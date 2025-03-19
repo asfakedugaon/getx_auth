@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:getx_auth_test/auth_controller/user_controller.dart';
+import 'package:getx_auth_test/view/order_screen.dart';
 import 'package:getx_auth_test/view/show_api_data.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -16,13 +17,20 @@ class _HomeScreenState extends State<HomeScreen> {
    @override
   void initState() {
     super.initState();
-    apiController.fetchApi();
+    apiController.getApi();
   }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Api Calling Page"),
+        actions: [
+          IconButton(onPressed: () {
+            apiController.fetchOrders().then((_) {
+              Get.to(() => OrderScreen());
+            });
+          }, icon: Icon(Icons.shopping_bag))
+        ],
       ),
       body:  Obx(() => GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

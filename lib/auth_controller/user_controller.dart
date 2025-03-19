@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:getx_auth_test/model/product_store_model.dart';
 
 import '../model/product_model.dart';
 import '../view/home_screen.dart';
@@ -19,8 +18,8 @@ class UserController extends GetxController {
   var isPasswordValid = true.obs;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   RxList productList = <ProductModel>[].obs;
-  RxList productStoreList = <ProductStoreModel>[].obs;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  RxList<Map<String, dynamic>> orderList = <Map<String, dynamic>>[].obs;
 
   void signUp() async {
     try {
@@ -60,7 +59,7 @@ class UserController extends GetxController {
     }
   }
 
-  Future<void> fetchApi() async{
+  Future<void> getApi() async{
     final response = await http.get(Uri.parse("https://fakestoreapi.com/products"));
     if(response.statusCode == 200){
       List<dynamic> result = jsonDecode(response.body);
@@ -76,12 +75,25 @@ class UserController extends GetxController {
         'title': product.title,
         'price': product.price,
         'description': product.description,
+        'category': product.category,
       });
       Get.snackbar("Success", "Order saved successfully!",
       colorText: Colors.white,backgroundColor: Colors.green);
     } catch(e) {
       Get.snackbar("Error", "Failed to save order: ${e.toString()}",
       colorText: Colors.white, backgroundColor: Colors.redAccent);
+    }
+  }
+
+  Future<void> fetchOrders() async{
+    try{
+      QuerySnapshot querySnapshot = await _firestore.collection('orders').get();
+      orderList.value = querySnapshot.docs.map((doc)=> doc.data() as Map<String, dynamic>).toList();
+    } catch(e) {
+      Get.snackbar("Error", "Failed to fetch orders: ${e.toString()}",
+      colorText: Colors.white,
+      backgroundColor: Colors.redAccent
+      );
     }
   }
 }
